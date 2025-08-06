@@ -1,64 +1,26 @@
-import Papa from "papaparse";
+import { GetReceived } from "@/lib/getReceived";
 import { useEffect, useState } from "react";
-
-type TableData = { fornecedor: string; valor: string };
+import { useLocation } from "react-router-dom";
 
 function Table() {
-  const [data, setData] = useState<TableData[]>([]);
+  const [data, setData] = useState<any[]>([]);
+
+  const location = useLocation();
+
+  const { r, p } = location.state || {};
 
   useEffect(() => {
-    const url =
-      "https://docs.google.com/spreadsheets/d/1m9SgVTpHCHvdWotPIhywuuynxtL7VfqM/gviz/tq?tqx=out:csv&gid=1368580946";
+    const fetchData = async () => {
+      try {
+        const result = await GetReceived(r);
+        setData(result);
+      } catch (err) {
+        console.error("Erro ao obter os dados:", err);
+      }
+    };
 
-    fetch(url)
-      .then((response) => response.text())
-      .then((csvText) => {
-        const lines = csvText.split("\n");
-
-        const headerIndex = lines.findIndex(
-          (line) => line.includes("Fornecedor") && line.includes("Vencimento")
-        );
-
-        const validCsv = lines.slice(headerIndex).join("\n");
-
-        Papa.parse(validCsv, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results: any) => {
-            const rawData = results.data;
-
-            const keys = Object.keys(rawData[0]);
-            const fornecedorKey = keys.find((key) =>
-              key.toLowerCase().includes("fornecedor")
-            );
-            const valorKey = keys.find(
-              (key) =>
-                key.toLowerCase().includes("original") ||
-                key.toLowerCase().includes("valor")
-            );
-
-            if (!fornecedorKey || !valorKey) {
-              console.error("Colunas 'fornecedor' ou 'valor' não encontradas.");
-              return;
-            }
-
-            const filtered = rawData
-              .map((row: any) => ({
-                fornecedor: row[fornecedorKey],
-                valor: row[valorKey],
-              }))
-              .filter((item: any) => item.fornecedor);
-
-            setData(filtered);
-          },
-          error: (err: any) => {
-            console.error("Erro ao fazer parse:", err);
-          },
-        });
-      });
+    fetchData();
   }, []);
-
-  const filter = ["REGISTROS", "Correios", "GERAL"];
 
   return (
     <div className="p-12 flex flex-col gap-12 overflow-y-auto">
@@ -73,33 +35,27 @@ function Table() {
       </div>
 
       <div className="flex flex-col items-center xl:grid xl:grid-cols-3 gap-8">
-        {data
-          .filter(
-            (value) =>
-              value.fornecedor.includes("TOTAL") &&
-              !filter.some((i) => value.fornecedor.includes(i))
-          )
-          .map((item, index) => (
-            <div
-              key={index}
-              className="w-sm h-60 rounded-4xl border shadow-md p-6"
-            >
-              <div className="h-full w-full flex justify-between flex-col">
-                <h2 className="font-bold text-lg">{item.fornecedor}</h2>
+        {data.map((item, index) => (
+          <div
+            key={index}
+            className="w-sm h-60 rounded-4xl border shadow-md p-6"
+          >
+            <div className="h-full w-full flex justify-between flex-col">
+              <h2 className="font-bold text-lg">{item.fornecedor}</h2>
 
-                <div className="flex flex-row gap-2 justify-between">
-                  <div className="flex flex-col w-1/2">
-                    <p className="text-sm text-gray-500">Valor original</p>
-                    <p className="text-lg font-semibold">{item.valor}</p>
-                  </div>
-                  {/* <div className="flex flex-col w-1/2">
+              <div className="flex flex-row gap-2 justify-between">
+                <div className="flex flex-col w-1/2">
+                  <p className="text-sm text-gray-500">Valor Recebido</p>
+                  <p className="text-lg font-semibold">{item.valor}</p>
+                </div>
+                {/* <div className="flex flex-col w-1/2">
                     <p className="text-sm text-gray-500">Comissão a pagar</p>
                     <p className="text-lg font-semibold">R$ 1.000,00</p>
                   </div> */}
-                </div>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
     </div>
   );

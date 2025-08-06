@@ -1,43 +1,39 @@
 import React, { createContext, useState } from "react";
 import Parse from "parse";
 
-interface IResult {
-  test: any;
-}
+type Clinica = { id_clinic: number; clinic_name: string };
+type Form = { id_form_received: string; id_form_paid: string };
 
 interface IResultContext {
-  fetchAppConfig: (game_id: string | null) => Promise<void>;
-  data: IResult;
+  getClinics: () => Promise<void>;
+  getFormsById: (id_month: number, id_clinic: number) => Promise<Form | null>;
+  clinics: Clinica[];
+  forms: Form;
   loading: boolean;
   configError: boolean;
   setConfigError: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const GameConfigContext = createContext<IResultContext>(
+export const ResultContext = createContext<IResultContext>(
   {} as IResultContext
 );
 
-export const GameConfigProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const [data, setData] = useState<IResult>({} as IResult);
+export const ResultProvider = ({ children }: { children: React.ReactNode }) => {
+  const [clinics, setClinics] = useState<Clinica[]>([]);
+  const [forms, setForms] = useState<Form>({} as Form);
   const [loading, setLoading] = useState<boolean>(false);
   const [configError, setConfigError] = useState<boolean>(false);
 
-  const fetchAppConfig = async (game_id: string | null) => {
+  const getClinics = async () => {
     setLoading(true);
 
     // Simulação de carregamento
     await new Promise((resolve) => setTimeout(resolve, 1450));
     try {
-      const result = await Parse.Cloud.run("getConfig", { game_id });
-
-      console.log(result);
+      const result = await Parse.Cloud.run("getClinics");
 
       if (result) {
-        setData(result);
+        setClinics(result);
       } else {
         setConfigError(true);
       }
@@ -49,17 +45,40 @@ export const GameConfigProvider = ({
     }
   };
 
+  const getFormsById = async (
+    id_month: number,
+    id_clinic: number
+  ): Promise<Form | null> => {
+    setLoading(true);
+
+    try {
+      const result: Form = await Parse.Cloud.run("getFormIds", {
+        id_month,
+        id_clinic,
+      });
+
+      return result ?? null;
+    } catch (error) {
+      console.error("Erro ao buscar formulários:", error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <GameConfigContext.Provider
+    <ResultContext.Provider
       value={{
-        fetchAppConfig,
-        data,
+        getClinics,
+        getFormsById,
+        clinics,
+        forms,
         loading,
         configError,
         setConfigError,
       }}
     >
       {children}
-    </GameConfigContext.Provider>
+    </ResultContext.Provider>
   );
 };
