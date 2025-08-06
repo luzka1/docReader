@@ -8,8 +8,8 @@ function Home() {
           <div className="flex flex-col text-center">
             <h1 className="title">Bem-vindo ao *INSIRA O NOME AQUI*</h1>
             <p className="paragraph">
-              Aqui você terá o controle dos valores das comissões de cada
-              dentista!
+              Aqui você terá o controle dos valores das comissões de todos os
+              dentistas!
             </p>
           </div>
 

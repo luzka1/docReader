@@ -8,7 +8,7 @@ function Table() {
 
   useEffect(() => {
     const url =
-      "https://docs.google.com/spreadsheets/d/1T5OKSCPCBdz39vvSS4ZwykuFn50IuqyB/gviz/tq?tqx=out:csv&gid=1368580946";
+      "https://docs.google.com/spreadsheets/d/1m9SgVTpHCHvdWotPIhywuuynxtL7VfqM/gviz/tq?tqx=out:csv&gid=1368580946";
 
     fetch(url)
       .then((response) => response.text())
@@ -26,8 +26,6 @@ function Table() {
           skipEmptyLines: true,
           complete: (results: any) => {
             const rawData = results.data;
-
-            console.log(rawData);
 
             const keys = Object.keys(rawData[0]);
             const fornecedorKey = keys.find((key) =>
@@ -76,7 +74,11 @@ function Table() {
 
       <div className="flex flex-col items-center xl:grid xl:grid-cols-3 gap-8">
         {data
-          .filter((value) => value.fornecedor.includes("TOTAL") && !value.fornecedor.includes(filter[0]))
+          .filter(
+            (value) =>
+              value.fornecedor.includes("TOTAL") &&
+              !filter.some((i) => value.fornecedor.includes(i))
+          )
           .map((item, index) => (
             <div
               key={index}
