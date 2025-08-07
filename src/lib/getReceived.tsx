@@ -7,6 +7,7 @@ export const GetReceived = async (
 
   try {
     const response = await fetch(url);
+
     const csvText = await response.text();
 
     const lines = csvText.split("\n");
@@ -25,13 +26,9 @@ export const GetReceived = async (
           const rawData = results.data;
 
           const keys = Object.keys(rawData[0] || {});
-          const fornecedorKey = keys.find((key) =>
-            key.toLowerCase().includes("fornecedor")
-          );
+          const fornecedorKey = keys.find((key) => key.includes("Fornecedor"));
           const valorKey = keys.find(
-            (key) =>
-              key.toLowerCase().includes("original") ||
-              key.toLowerCase().includes("valor")
+            (key) => key.includes("Pago") || key.includes("A Pagar")
           );
 
           if (!fornecedorKey || !valorKey) {
@@ -48,12 +45,12 @@ export const GetReceived = async (
             }))
             .filter((item: any) => item.fornecedor);
 
-          const includedNames = ["TOTAL"];
-
           const filteredData = filtered.filter((value: any) => {
             const fornecedor = value.fornecedor.toUpperCase().trim();
 
-            const isDoctor = /\b(DR|DRA|PROT|PROTETICO|PROTÉTICO)\.?\b/.test(fornecedor);
+            const isDoctor = /\b(DR|DRA|PROT|PROTETICO|PROTÉTICO)\.?\b/.test(
+              fornecedor
+            );
 
             const isIncluded = fornecedor.includes("TOTAL");
 

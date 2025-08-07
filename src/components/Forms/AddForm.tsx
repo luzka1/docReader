@@ -11,35 +11,20 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { useResultContext } from "@/hooks/useResultContext";
 import { LoaderCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Input } from "../ui/input";
 
-function InitialForm() {
-  const { getClinics, getFormsById, clinics, loading } = useResultContext();
-
-  const navigate = useNavigate();
+function AddForm() {
+  const { getClinics, clinics, loading } = useResultContext();
 
   const [formData, setFormData] = useState({
     id_month: 0,
     id_clinic: 0,
+    id_form_received: "",
+    id_form_paid: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const data = await getFormsById(formData.id_month, formData.id_clinic);
-
-    if (data) {
-      navigate(`/results`, {
-        state: {
-          r: data.id_form_received,
-          p: data.id_form_paid,
-          c: formData.id_clinic,
-          m: formData.id_month,
-        },
-      });
-    } else {
-      alert("Erro ao buscar formulários");
-    }
   };
 
   useEffect(() => {
@@ -96,6 +81,31 @@ function InitialForm() {
           </SelectContent>
         </Select>
 
+        <div className="w-full flex gap-4">
+          <Input
+            required
+            placeholder="Insira o Id da planilha de contas a pagar"
+            minLength={33}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                id_form_received: e.target.value,
+              }))
+            }
+          />
+          <Input
+            required
+            placeholder="Insira o Id da planilha de contas Pagas"
+            minLength={33}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                id_form_received: e.target.value,
+              }))
+            }
+          />
+        </div>
+
         <Button
           type="submit"
           className="disabled:cursor-progress"
@@ -115,4 +125,4 @@ function InitialForm() {
   );
 }
 
-export { InitialForm };
+export { AddForm };

@@ -1,62 +1,157 @@
-import { GetReceived } from "@/lib/getReceived";
+// ============== HOOKS ==============
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+// ============== UI ==============
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PriceCard } from "@/components/ui/priceCard";
+import { LoaderCircle } from "lucide-react";
+// ============== FUNCTIONS ==============
+import { combineValuesByName } from "@/lib/combineValuesByName";
+import { GetReceived } from "@/lib/getReceived";
+import { getMonthByNumber } from "@/lib/getMonthByNumber";
+import { getClinicByNumber } from "@/lib/getClinicByNumber";
 
 function Table() {
-  const [data, setData] = useState<any[]>([]);
-
   const location = useLocation();
 
-  const { r, p } = location.state || {};
+  const { r, p, m, c } = location.state || {};
+
+  const [data, setData] = useState<any[]>([]);
+  const [initialData, setInitialData] = useState<any[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [search, setSearch] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const mes = m ? getMonthByNumber(parseInt(m)) : 0;
+  const clinica = c ? getClinicByNumber(parseInt(c)) : 0;
 
   useEffect(() => {
+    setLoading(true);
     const fetchData = async () => {
       try {
-        const result = await GetReceived(r);
-        setData(result);
+        const resultR = await GetReceived(r);
+        const resultP = await GetReceived(p);
+
+        const combined = await combineValuesByName(resultR, resultP);
+        setData(combined);
+        setInitialData(combined);
       } catch (err) {
         console.error("Erro ao obter os dados:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const refreshTotal = () => {
+      const geralTotal = data.reduce((acc, item) => acc + (item.total || 0), 0);
+
+      setTotal(geralTotal);
+    };
+
+    refreshTotal();
+  }, [data]);
+
+  function removeAccents(str: string) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  const searchByName = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    try {
+      const query = removeAccents(search.trim().toLowerCase());
+
+      if (query) {
+        const filtered = initialData.filter((item) =>
+          removeAccents(item.fornecedor.toLowerCase()).includes(query)
+        );
+
+        setData(filtered);
+      } else {
+        setData([]);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="p-12 flex flex-col gap-12 overflow-y-auto">
-      <div>
-        <h1 className="title">
-          Valores arrecadados na primeira quinzena de agosto de 2025
-        </h1>
-        <p className="paragraph">
-          Todos os valores arrecadados do período selecionado conforme a
-          solicitação.
-        </p>
+    <div className="p-4 md:p-12 flex flex-col overflow-y-auto w-full h-full">
+      <div className="w-full flex justify-between">
+        <div>
+          <h1 className="text-title font-bold text-lg md:text-2xl">
+            {clinica} - {mes}
+          </h1>
+          <p className="text-sm md:text-md">Total de pagamentos do período</p>
+        </div>
+        <div>
+          <Button>
+            <a href="/">Nova consulta</a>
+          </Button>
+        </div>
+      </div>
+      <div className="w-full flex flex-col gap-8 md:gap-2 py-4">
+        <form className="flex gap-2" onSubmit={(e) => searchByName(e)}>
+          <Input
+            className="w-sm"
+            placeholder="Pesquise um dentista (Ex: Marcos)"
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearch(value);
+
+              if (value.trim() === "") {
+                setData(initialData);
+              }
+            }}
+          />
+          <Button type="submit">Buscar</Button>
+        </form>
+        <div className="w-full flex flex-col justify-end items-end">
+          <h2 className="text-md">Total arrecadado: </h2>
+          <p className="text-2xl font-semibold">
+            {total.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col items-center xl:grid xl:grid-cols-3 gap-8">
-        {data.map((item, index) => (
-          <div
-            key={index}
-            className="w-sm h-60 rounded-4xl border shadow-md p-6"
-          >
-            <div className="h-full w-full flex justify-between flex-col">
-              <h2 className="font-bold text-lg">{item.fornecedor}</h2>
-
-              <div className="flex flex-row gap-2 justify-between">
-                <div className="flex flex-col w-1/2">
-                  <p className="text-sm text-gray-500">Valor Recebido</p>
-                  <p className="text-lg font-semibold">{item.valor}</p>
-                </div>
-                {/* <div className="flex flex-col w-1/2">
-                    <p className="text-sm text-gray-500">Comissão a pagar</p>
-                    <p className="text-lg font-semibold">R$ 1.000,00</p>
-                  </div> */}
-              </div>
-            </div>
+      {loading ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="flex flex-row gap-2">
+            <LoaderCircle className="animate-spin text-cdp-blue" />
+            <p className="text-muted-foreground">Carregando...</p>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : data.length <= 0 ? (
+        <div className="flex items-center justify-center w-full h-full">
+          Nenhum registro encontrado!
+        </div>
+      ) : (
+        <div className="flex flex-col md:grid md:grid-cols-[repeat(auto-fit,minmax(384px,1fr))] gap-8">
+          {data
+            .sort((a, b) => b.fornecedor.localeCompare(a.fornecedor))
+            .map((item, index) => (
+              <PriceCard
+                key={index}
+                fornecedor={item.fornecedor}
+                pagar={item.pagar}
+                pago={item.pago}
+                total={item.total}
+              />
+            ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,21 @@ body {
   padding: 0;
   box-sizing: border-box;
   background-color: rgb(91, 91, 207);
+  scrollbar-width: thin;
+  scrollbar-color: transparent none;
+}
+
+*::-webkit-scrollbar {
+  width: 8px; 
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 10px;
 }
 
 @theme inline {
@@ -47,7 +62,7 @@ body {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-cdp-blue: var(--cdp-blue);
-   --color-title: var(--color-title);
+  --color-title: var(--color-title);
 }
 
 :root {
