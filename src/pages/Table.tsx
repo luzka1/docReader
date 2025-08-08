@@ -89,7 +89,7 @@ function Table() {
 
   return (
     <div className="p-4 md:p-12 flex flex-col overflow-y-auto w-full h-full">
-      <div className="w-full flex flex-col gap-4 justify-between">
+      <div className="flex w-full justify-between gap-4">
         <div>
           <h1 className="text-title font-bold text-lg md:text-2xl">
             {clinica} - {mes}
