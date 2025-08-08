@@ -18,7 +18,7 @@ function Add() {
             </h1>
             <p className="text-sm text-muted-foreground md:text-base">
               Adicione todos os Ids de planilhas que contém valores pagos e a
-              pagar d
+              pagar das comissões.
             </p>
           </div>
 
