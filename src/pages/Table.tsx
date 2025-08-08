@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceCard } from "@/components/ui/priceCard";
-import { LoaderCircle, Plus, PlusCircle } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 // ============== FUNCTIONS ==============
 import { combineValuesByName } from "@/functions/combineValuesByName";
 import { GetReceived } from "@/functions/getReceived";
