@@ -7,7 +7,7 @@ type Form = { id_form_received: string; id_form_paid: string };
 type newForm = {
   id_form_received: string;
   id_form_paid: string;
-  id_clinic: number;
+  id_clinica: number;
   id_month: number;
 };
 
@@ -15,7 +15,7 @@ type newForm = {
 interface IResultContext {
   getClinics: () => Promise<void>;
   getFormsById: (id_month: number, id_clinic: number) => Promise<Form | null>;
-  addNewForm: (body: newForm) => Promise<void>;
+  addNewForm: (body: newForm) => Promise<string>;
   clinics: Clinica[];
   loading: boolean;
 }
@@ -76,12 +76,18 @@ export const ResultProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const addNewForm = async (body: newForm): Promise<void> => {
+  const addNewForm = async (body: newForm): Promise<string> => {
+    setLoading(true)
+    // Simulação de carregamento de 1,45s
+    await new Promise((resolve) => setTimeout(resolve, 1450));
     try {
       const result = await Parse.Cloud.run("addNewForm", body);
-      console.log(result);
-    } catch (error) {
+      return result;
+    } catch (error: any) {
       console.error("Erro ao chamar a função do Parse:", error);
+      return error;
+    } finally {
+      setLoading(false);
     }
   };
 

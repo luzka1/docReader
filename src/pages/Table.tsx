@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { PriceCard } from "@/components/ui/priceCard";
 import { LoaderCircle } from "lucide-react";
 // ============== FUNCTIONS ==============
-import { combineValuesByName } from "@/lib/combineValuesByName";
-import { GetReceived } from "@/lib/getReceived";
-import { getMonthByNumber } from "@/lib/getMonthByNumber";
-import { getClinicByNumber } from "@/lib/getClinicByNumber";
+import { combineValuesByName } from "@/functions/combineValuesByName";
+import { GetReceived } from "@/functions/getReceived";
+import { getMonthByNumber } from "@/functions/getMonthByNumber";
+import { getClinicByNumber } from "@/functions/getClinicByNumber";
 
 function Table() {
   const location = useLocation();

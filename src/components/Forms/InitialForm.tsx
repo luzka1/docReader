@@ -12,12 +12,15 @@ import { Button } from "../ui/button";
 import { useResultContext } from "@/hooks/useResultContext";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Dialog } from "../Dialog";
 
 function InitialForm() {
   const { getClinics, getFormsById, clinics, loading } = useResultContext();
 
   const navigate = useNavigate();
 
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
   const [formData, setFormData] = useState({
     id_month: 0,
     id_clinic: 0,
@@ -28,18 +31,28 @@ function InitialForm() {
 
     const data = await getFormsById(formData.id_month, formData.id_clinic);
 
-    if (data) {
-      navigate(`/results`, {
-        state: {
-          r: data.id_form_received,
-          p: data.id_form_paid,
-          c: formData.id_clinic,
-          m: formData.id_month,
-        },
-      });
-    } else {
-      alert("Erro ao buscar formulários");
+    try {
+      if (data) {
+        navigate(`/results`, {
+          state: {
+            r: data.id_form_received,
+            p: data.id_form_paid,
+            c: formData.id_clinic,
+            m: formData.id_month,
+          },
+        });
+      } else {
+        setMessage("Comissões não encontradas!");
+        handleControlDialog(true);
+      }
+    } catch (error: any) {
+      setMessage(error.text);
+      handleControlDialog(true);
     }
+  };
+
+  const handleControlDialog = (isOpen: boolean) => {
+    setIsDialogOpen(isOpen);
   };
 
   useEffect(() => {
@@ -48,6 +61,12 @@ function InitialForm() {
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
+      <Dialog
+        isDialogOpen={isDialogOpen}
+        message={message}
+        controlDialog={handleControlDialog}
+      />
+
       <div className="flex flex-col gap-4">
         <Select
           required
