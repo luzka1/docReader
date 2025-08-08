@@ -5,12 +5,14 @@ import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceCard } from "@/components/ui/priceCard";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Plus, PlusCircle } from "lucide-react";
 // ============== FUNCTIONS ==============
 import { combineValuesByName } from "@/functions/combineValuesByName";
 import { GetReceived } from "@/functions/getReceived";
 import { getMonthByNumber } from "@/functions/getMonthByNumber";
 import { getClinicByNumber } from "@/functions/getClinicByNumber";
+import { useWindowSize } from "@/functions/getWindowSize";
+import { motion } from "motion/react";
 
 function Table() {
   const location = useLocation();
@@ -24,6 +26,7 @@ function Table() {
   const [loading, setLoading] = useState<boolean>(true);
   const mes = m ? getMonthByNumber(parseInt(m)) : 0;
   const clinica = c ? getClinicByNumber(parseInt(c)) : 0;
+  const { width } = useWindowSize();
 
   useEffect(() => {
     setLoading(true);
@@ -86,23 +89,36 @@ function Table() {
 
   return (
     <div className="p-4 md:p-12 flex flex-col overflow-y-auto w-full h-full">
-      <div className="w-full flex justify-between">
+      <div className="w-full flex flex-col gap-4 justify-between">
         <div>
           <h1 className="text-title font-bold text-lg md:text-2xl">
             {clinica} - {mes}
           </h1>
           <p className="text-sm md:text-md">Total de pagamentos do período</p>
         </div>
-        <div>
-          <Button>
-            <a href="/">Nova consulta</a>
-          </Button>
-        </div>
+        {width >= 1024 ? (
+          <div>
+            <Button>
+              <a href="/">Nova consulta</a>
+            </Button>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", duration: 1, ease: "easeInOut" }}
+            className="z-20 fixed bottom-5 right-5"
+          >
+            <Button className="rounded-full shadow-lg flex items-center justify-center bg-yellow-300 w-12 h-12 text-cdp-blue">
+              <a href="/"><Plus /></a>
+            </Button>
+          </motion.div>
+        )}
       </div>
       <div className="w-full flex flex-col gap-8 md:gap-2 py-4">
         <form className="flex gap-2" onSubmit={(e) => searchByName(e)}>
           <Input
-            className="w-sm"
+            className="w-sm placeholder:text-sm md:placeholder:text-base"
             placeholder="Pesquise um dentista (Ex: Marcos)"
             onChange={(e) => {
               const value = e.target.value;
