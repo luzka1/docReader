@@ -4,7 +4,7 @@ import logo from "@/assets/logo.png";
 
 function Home() {
   return (
-    <div className="w-full flex flex-col-reverse md:flex-row-reverse">
+    <div className="w-full flex flex-col-reverse md:flex-row-reverse gap-4 overflow-auto">
       <motion.div
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
@@ -26,7 +26,7 @@ function Home() {
         </div>
       </motion.div>
 
-      <div className="h-2/3 md:h-full w-full md:w-1/2 bg-cdp-blue rounded-3xl">
+      <div className="h-full md:h-full w-full md:w-1/2 bg-cdp-blue rounded-3xl">
         <img className="h-full w-full rounded-3xl object-contain xl:object-fill" src={logo} alt="Logo da clínica dentista do povo" />
       </div>
     </div>
