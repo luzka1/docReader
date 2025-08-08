@@ -27,7 +27,7 @@ function Home() {
       </motion.div>
 
       <div className="h-2/3 md:h-full w-full md:w-1/2 bg-cdp-blue rounded-3xl">
-        <img className="h-full w-full rounded-3xl" src={logo} alt="Logo da clínica dentista do povo" />
+        <img className="h-full w-full rounded-3xl object-contain xl:object-fill" src={logo} alt="Logo da clínica dentista do povo" />
       </div>
     </div>
   );
